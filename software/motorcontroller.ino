@@ -2,9 +2,12 @@
 
 Servo upDown;
 Servo leftRight;
+Servo bubbleSpin;
 
 const int udPin = 5;
 const int lrPin = 6;
+const int bubbleSpinPin = 7;
+// # when on, set to 100, when off, set to 90 
 
 int udPos = 90; // Start at middle
 int lrPos = 90;
@@ -17,6 +20,9 @@ const int updateDelay = 15;    // ms between servo updates
 unsigned long lastUpdate = 0;
 
 void setup() {
+  bubbleSpin.attach(bubbleSpinPin);
+  bubbleSpin.writeMicroseconds(1500);
+
   upDown.attach(udPin);
   leftRight.attach(lrPin);
   upDown.write(udPos);
@@ -42,6 +48,8 @@ void loop() {
         targetUd = 90; 
         targetLr = 90; 
         break;
+      case 'x': bubbleSpin.writeMicroseconds(1500); break; // don't spin
+      case 's': bubbleSpin.write(100); break; // spin
     }
   }
 
@@ -51,7 +59,7 @@ void loop() {
 
     if (udPos != targetUd) {
       udPos += (targetUd > udPos) ? stepSize : -stepSize;
-      udPos = constrain(udPos, 0, 180);
+      udPos = constrain(udPos, 80, 100);
       upDown.write(udPos);
     }
 

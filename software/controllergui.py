@@ -5,6 +5,7 @@ import threading
 import json
 import os
 
+
 class ControllerGUI:
     def __init__(self, root):
         self.last_direction = ''
@@ -59,11 +60,32 @@ class ControllerGUI:
         self.connect_button = tk.Button(self.connection_frame, text="Connect", command=self.connect)
         self.connect_button.grid(row=0, column=2, padx=5, pady=5)
 
-        self.disconnect_button = tk.Button(self.connection_frame, text="Disconnect", command=self.disconnect, state=tk.DISABLED)
+        self.disconnect_button = tk.Button(self.connection_frame, text="Disconnect", command=self.disconnect,
+                                           state=tk.DISABLED)
         self.disconnect_button.grid(row=0, column=3, padx=5, pady=5)
 
         self.status_label = tk.Label(self.connection_frame, text="Status: Disconnected", fg="red")
         self.status_label.grid(row=0, column=4, padx=5, pady=5)
+
+    def setup_recording_section(self):
+        self.recording_frame = tk.LabelFrame(self.main_frame, text="Recording Controls", padx=10, pady=10)
+        self.recording_frame.pack(fill=tk.X, pady=10)
+
+        self.record_button = tk.Button(self.recording_frame, text="Start Recording", fg="black",
+                                       command=self.toggle_recording, width=15)
+        self.record_button.grid(row=0, column=0, padx=5, pady=5)
+
+        self.save_name_label = tk.Label(self.recording_frame, text="Recording Name:", fg="white")
+        self.save_name_label.grid(row=0, column=1, padx=5, pady=5)
+
+        self.save_name_entry = tk.Entry(self.recording_frame, width=20, fg="black", bg="white")
+        self.save_name_entry.insert(0, "New Recording")
+        self.save_name_entry.grid(row=0, column=2, padx=5, pady=5)
+
+        self.save_button = tk.Button(self.recording_frame, text="Save Recording", fg="black",
+                                     command=self.save_recording, width=15, state=tk.DISABLED)
+        self.save_button.grid(row=0, column=3, padx=5, pady=5)
+
 
     def setup_controls_section(self):
         self.controls_frame = tk.LabelFrame(self.main_frame, text="Controls", padx=10, pady=10)
@@ -76,13 +98,15 @@ class ControllerGUI:
         self.canvas.pack()
 
         self.base_radius = 80
-        self.canvas.create_oval(100 - self.base_radius, 100 - self.base_radius, 100 + self.base_radius, 100 + self.base_radius, fill="gray", outline="black", width=2)
+        self.canvas.create_oval(100 - self.base_radius, 100 - self.base_radius, 100 + self.base_radius,
+                                100 + self.base_radius, fill="gray", outline="black", width=2)
 
         self.handle_radius = 20
-        self.handle = self.canvas.create_oval(100 - self.handle_radius, 100 - self.handle_radius, 100 + self.handle_radius, 100 + self.handle_radius, fill="red", outline="black", width=2)
+        self.handle = self.canvas.create_oval(100 - self.handle_radius, 100 - self.handle_radius,
+                                              100 + self.handle_radius, 100 + self.handle_radius, fill="red",
+                                              outline="black", width=2)
 
         self.canvas.bind("<Button-1>", self.start_move)
-        self.canvas.bind("<ButtonRelease-1>", self.stop_move)
         self.canvas.bind("<B1-Motion>", self.move_joystick)
         self.canvas.bind("<ButtonRelease-1>", self.reset_joystick)
 
@@ -107,31 +131,20 @@ class ControllerGUI:
         self.up_left_button = tk.Button(self.buttons_frame, text="↖", width=4, command=lambda: self.send_diagonal('ul'))
         self.up_left_button.grid(row=0, column=0, padx=5, pady=5)
 
-        self.up_right_button = tk.Button(self.buttons_frame, text="↗", width=4, command=lambda: self.send_diagonal('ur'))
+        self.up_right_button = tk.Button(self.buttons_frame, text="↗", width=4,
+                                         command=lambda: self.send_diagonal('ur'))
         self.up_right_button.grid(row=0, column=2, padx=5, pady=5)
 
-        self.down_left_button = tk.Button(self.buttons_frame, text="↙", width=4, command=lambda: self.send_diagonal('dl'))
+        self.down_left_button = tk.Button(self.buttons_frame, text="↙", width=4,
+                                          command=lambda: self.send_diagonal('dl'))
         self.down_left_button.grid(row=2, column=0, padx=5, pady=5)
 
-        self.down_right_button = tk.Button(self.buttons_frame, text="↘", width=4, command=lambda: self.send_diagonal('dr'))
+        self.down_right_button = tk.Button(self.buttons_frame, text="↘", width=4,
+                                           command=lambda: self.send_diagonal('dr'))
         self.down_right_button.grid(row=2, column=2, padx=5, pady=5)
 
-    def setup_recording_section(self):
-        self.recording_frame = tk.LabelFrame(self.main_frame, text="Recording Controls", padx=10, pady=10)
-        self.recording_frame.pack(fill=tk.X, pady=10)
-
-        self.record_button = tk.Button(self.recording_frame, text="Start Recording", fg="black", command=self.toggle_recording, width=15)
-        self.record_button.grid(row=0, column=0, padx=5, pady=5)
-
-        self.save_name_label = tk.Label(self.recording_frame, text="Recording Name:", fg="white")
-        self.save_name_label.grid(row=0, column=1, padx=5, pady=5)
-
-        self.save_name_entry = tk.Entry(self.recording_frame, width=20, fg="black", bg="white")
-        self.save_name_entry.insert(0, "New Recording")
-        self.save_name_entry.grid(row=0, column=2, padx=5, pady=5)
-
-        self.save_button = tk.Button(self.recording_frame, text="Save Recording", fg="black", command=self.save_recording, width=15, state=tk.DISABLED)
-        self.save_button.grid(row=0, column=3, padx=5, pady=5)
+        self.bubble_spin_button = tk.Button(self.buttons_frame, text="Turn Spin ON", width=8, command=lambda: self.toggle_spin())
+        self.bubble_spin_button.grid(row=3, column=1, padx=5, pady=5)
 
     def setup_playback_section(self):
         self.playback_frame = tk.LabelFrame(self.main_frame, text="Playback Controls", padx=10, pady=10)
@@ -146,13 +159,16 @@ class ControllerGUI:
         self.recording_dropdown.grid(row=0, column=1, padx=5, pady=5)
         self.update_recording_dropdown()
 
-        self.play_button = tk.Button(self.playback_frame, text="Play", fg="black", command=self.play_recording, width=10)
+        self.play_button = tk.Button(self.playback_frame, text="Play", fg="black", command=self.play_recording,
+                                     width=10)
         self.play_button.grid(row=0, column=2, padx=5, pady=5)
 
-        self.stop_button = tk.Button(self.playback_frame, text="Stop", fg="black", command=self.stop_playback, width=10, state=tk.DISABLED)
+        self.stop_button = tk.Button(self.playback_frame, text="Stop", fg="black", command=self.stop_playback, width=10,
+                                     state=tk.DISABLED)
         self.stop_button.grid(row=0, column=3, padx=5, pady=5)
 
-        self.delete_button = tk.Button(self.playback_frame, text="Delete Recording", fg="black", command=self.delete_recording, width=15)
+        self.delete_button = tk.Button(self.playback_frame, text="Delete Recording", fg="black",
+                                       command=self.delete_recording, width=15)
         self.delete_button.grid(row=0, column=4, padx=5, pady=5)
 
         self.loop_var = tk.BooleanVar()
@@ -167,6 +183,17 @@ class ControllerGUI:
         self.console.pack(fill=tk.BOTH, expand=True)
         self.console.config(state=tk.DISABLED)
 
+    def toggle_spin(self):
+        if not hasattr(self, 'spin_on') or not self.spin_on:
+            self.send_command('s')
+            self.spin_on = True
+            self.bubble_spin_button.config(text="Turn Spin OFF", bg="green")
+            self.log_to_console("Spin turned ON")
+        else:
+            self.send_command('x')
+            self.spin_on = False
+            self.bubble_spin_button.config(text="Turn Spin ON", bg="lightgray")
+            self.log_to_console("Spin turned OFF")
     def toggle_control_buttons(self, state):
         state_value = tk.NORMAL if state else tk.DISABLED
         self.up_button.config(state=state_value)
@@ -178,6 +205,7 @@ class ControllerGUI:
         self.up_right_button.config(state=state_value)
         self.down_left_button.config(state=state_value)
         self.down_right_button.config(state=state_value)
+        self.bubble_spin_button.config(state=state_value)
 
     def toggle_recording_buttons(self, state):
         state_value = tk.NORMAL if state else tk.DISABLED
@@ -265,19 +293,15 @@ class ControllerGUI:
     def send_diagonal(self, direction):
         if direction == 'ul':
             self.send_command('u')
-            time.sleep(0.1)
             self.send_command('l')
         elif direction == 'ur':
             self.send_command('u')
-            time.sleep(0.1)
             self.send_command('r')
         elif direction == 'dl':
             self.send_command('d')
-            time.sleep(0.1)
             self.send_command('l')
         elif direction == 'dr':
             self.send_command('d')
-            time.sleep(0.1)
             self.send_command('r')
 
     def reset_position(self):
@@ -289,11 +313,9 @@ class ControllerGUI:
         self.last_y = event.y
         self.move_joystick(event)
 
-    def stop_move(self, event):
-        self.reset_joystick()
-
     def reset_joystick(self, event=None):
-        self.canvas.coords(self.handle, 100 - self.handle_radius, 100 - self.handle_radius, 100 + self.handle_radius, 100 + self.handle_radius)
+        self.canvas.coords(self.handle, 100 - self.handle_radius, 100 - self.handle_radius, 100 + self.handle_radius,
+                           100 + self.handle_radius)
         self.last_direction = ''
         self.hold_active = False
         if hasattr(self, 'repeat_task'):
@@ -502,7 +524,8 @@ class ControllerGUI:
     def repeat_command(self, direction):
         if self.hold_active and direction == self.last_direction:
             self.send_command(direction)
-            interval = int(self.hold_interval * (1.5 if hasattr(self, 'first_repeat') and not self.first_repeat else 1.0))
+            interval = int(
+                self.hold_interval * (1.5 if hasattr(self, 'first_repeat') and not self.first_repeat else 1.0))
             self.first_repeat = False
             self.repeat_task = self.root.after(interval, lambda: self.repeat_command(direction))
 
@@ -514,6 +537,7 @@ class ControllerGUI:
         if self.is_connected:
             self.disconnect()
         self.root.destroy()
+
 
 if __name__ == "__main__":
     root = tk.Tk()
